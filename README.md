@@ -5,7 +5,7 @@ A second objective aims at developing behaviour rules for the vehicles that will
 The objectives of this project are to develop multiple strategies to evaluate in terms of robustness and stability of the vehicles’ motion under differing levels of GNSS and communications noise and different environmental conditions.
 
 ## Related Packages
-Required: Ubuntu 16.04 with ROS Kinetic (http://wiki.ros.org/kinetic). ALso, the following packages are required: 
+Required: Ubuntu 16.04 with ROS Kinetic (http://wiki.ros.org/kinetic). Also, the following packages are required: 
 
 * UUV-simulator:
 
@@ -23,6 +23,7 @@ Install all related packages and the current work:
 ```
 $ cd ~/thesis_ws/src
 $ git clone https://github.com/uuvsimulator/uuv_simulator
+$ git clone https://github.com/gregoire-hw/GO-Thesis
 $ cd ~/catkin_ws
 & catkin_make
 ```
