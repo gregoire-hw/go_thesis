@@ -25,7 +25,7 @@ Install all related packages and the current work:
 ```
 $ cd ~/thesis_ws/src
 $ git clone https://github.com/uuvsimulator/uuv_simulator
-$ git clone https://github.com/gregoire-hw/GO-Thesis.git
+$ git clone https://github.com/gregoire-hw/go_thesis.git
 $ cd ~/catkin_ws
 & catkin_make
 ```
