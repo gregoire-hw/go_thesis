@@ -10,7 +10,11 @@ project(GO-Thesis)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+<<<<<<< HEAD
   std_msgs
+=======
+  stf_msgs
+>>>>>>> c25b03d18b5c582f9802be614d6d602388edd591
 )
 
 ## System dependencies are found with CMake's conventions
@@ -70,7 +74,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
+<<<<<<< HEAD
 #   std_msgs
+=======
+#   stf_msgs
+>>>>>>> c25b03d18b5c582f9802be614d6d602388edd591
 # )
 
 ################################################
@@ -105,7 +113,11 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES GO-Thesis
+<<<<<<< HEAD
 #  CATKIN_DEPENDS roscpp rospy std_msgs
+=======
+#  CATKIN_DEPENDS roscpp rospy stf_msgs
+>>>>>>> c25b03d18b5c582f9802be614d6d602388edd591
 #  DEPENDS system_lib
 )
 
