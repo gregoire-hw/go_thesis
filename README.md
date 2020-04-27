@@ -10,5 +10,19 @@ Required: Ubuntu 16.04 with ROS Kinetic (http://wiki.ros.org/kinetic). ALso, the
 * UUV-simulator:
 
   https://github.com/uuvsimulator/uuv_simulator
-  
-## Installations
+
+## Environment Setup
+Create the Workspace:
+```
+$ source /opt/ros/kinetic/setup.bash
+$ mkdir -p ~/thesis_ws/src
+$ cd ~/thesis_ws/
+$ catkin_make
+```
+Install all related packages and the current work:
+```
+$ cd ~/thesis_ws/src
+$ git clone https://github.com/uuvsimulator/uuv_simulator
+$ cd ~/catkin_ws
+& catkin_make
+```
