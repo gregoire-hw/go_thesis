@@ -13,6 +13,14 @@ Required: Ubuntu 16.04 with ROS Kinetic (http://wiki.ros.org/kinetic). Also, the
 
   https://github.com/uuvsimulator/uuv_simulator
 
+* Desistek SAGA ROV vehicle:
+
+  https://github.com/uuvsimulator/desistek_saga.git
+
+* Heron USV:
+
+  https://clearpathrobotics.com/blog/2019/01/heron-usv-gets-a-new-simulator/
+
 ## Environment Setup
 Create the Workspace:
 ```
@@ -25,6 +33,7 @@ Install all related packages and the current work:
 ```
 $ cd ~/thesis_ws/src
 $ git clone https://github.com/uuvsimulator/uuv_simulator
+$ git clone https://github.com/uuvsimulator/desistek_saga.git
 $ git clone https://github.com/gregoire-hw/go_thesis.git
 $ cd ~/catkin_ws
 & catkin_make
