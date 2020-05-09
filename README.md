@@ -38,3 +38,35 @@ $ git clone https://github.com/gregoire-hw/go_thesis.git
 $ cd ~/catkin_ws
 & catkin_make
 ```
+
+## Set the different sensors:
+# Desistek Saga:
+The DVL needs to be added to the desistek saga.
+```
+$ roscd desistek_saga_description/urdf/
+$ sudo gedit desistek_saga_sensors.xacro
+```
+Add the following lines:
+```xml
+<!-- DVL -->
+<xacro:default_dvl_macro
+  namespace="${namespace}"
+  parent_link="${namespace}/base_link"
+  inertial_reference_frame="${inertial_reference_frame}">
+  <origin xyz="0 0 0" rpy="0 ${0.5*pi} 0"/>
+</xacro:default_dvl_macro>
+```
+# Heron:
+
+## Work done:
+- [x] Launch a UUV simulator world with an ASV and an AUV
+- [x] Range-Only localisation
+- [x] AUV localisation using DVL
+
+## List of program files:
+File | Description
+-----|------------
+desistek_dvl.py | Converts data from DVL and IMU into the position of the desistek.
+heron_controller.py | Control heron's thrusters.
+heron_thrustersManager.py | Get the thrusters values from heron_controller.py and send them to the ASV.
+lbl.py | Simulates the LBL range-only localisation between the two robots.
