@@ -61,7 +61,7 @@ Add the following lines:
 ## Work done:
 - [x] Launch a UUV simulator world with an ASV and an AUV
 - [x] Range-Only localisation
-- [x] AUV localisation using DVL
+- [ ] AUV localisation using DVL
 
 ## List of program files:
 File | Description
