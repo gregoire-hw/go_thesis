@@ -40,7 +40,7 @@ $ cd ~/catkin_ws
 ```
 
 ## Set the different sensors:
-# Desistek Saga:
+### Desistek Saga:
 The DVL needs to be added to the desistek saga.
 ```
 $ roscd desistek_saga_description/urdf/
@@ -56,7 +56,7 @@ Add the following lines:
   <origin xyz="0 0 0" rpy="0 ${0.5*pi} 0"/>
 </xacro:default_dvl_macro>
 ```
-# Heron:
+### Heron:
 
 ## Work done:
 - [x] Launch a UUV simulator world with an ASV and an AUV
