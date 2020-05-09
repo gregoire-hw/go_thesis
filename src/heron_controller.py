@@ -32,4 +32,5 @@ def main(args):
 		print("Shutting down")
 
 if __name__ == '__main__':
+	rospy.loginfo("Starting heron_controller.py")
 	main(sys.argv)

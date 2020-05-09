@@ -32,5 +32,6 @@ def init():
 	rospy.spin()
 
 if __name__ == '__main__':
+	rospy.loginfo("Starting heron_thrustersManager.py")
 	rospy.init_node("heron_thrusters_manager")
 	init()

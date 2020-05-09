@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<launch>
+	<!-- launch Gazebo world -->
+	<include file="$(find uuv_gazebo_worlds)/launch/ocean_waves.launch"/>
+
+	<!-- launch ASV model -->
+	<group ns="heron">
+		<param name="tf_prefix" value="heron_tf"/>
+		<include file="$(find heron_gazebo)/launch/heron_sim.launch"/>
+	</group>
+
+	<!-- cmd Heron -->
+	<node pkg="go_thesis" type="heron_thrustersManager.py" name="heron_thusters_manager" output="screen"/>
+	<node pkg="go_thesis" type="heron_controller.py" name="heron_control" output="screen"/>
+</launch>

@@ -8,7 +8,7 @@
 	<include file="$(find desistek_saga_description)/launch/upload_desistek_saga.launch">
 	    <arg name="x" value="0.0"/>
     	<arg name="y" value="0.0"/>
-    	<arg name="z" value="-0.5"/>
+    	<arg name="z" value="-5.0"/>
     	<arg name="yaw" value="0.0"/>
     </include>
 	
@@ -26,4 +26,7 @@
 	<!-- cmd Heron -->
 	<node pkg="go_thesis" type="heron_thrustersManager.py" name="heron_thusters_manager" output="screen"/>
 	<node pkg="go_thesis" type="heron_controller.py" name="heron_control" output="screen"/>
+
+	<!-- Long Baseline -->
+	<!-- <node pkg="go_thesis" type="lbl.py" name="lbl_comm" output="screen"/> -->
 </launch>
