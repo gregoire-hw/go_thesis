@@ -60,7 +60,7 @@ Add the following lines:
 
 ## Work done:
 - [x] Launch a UUV simulator world with an ASV and an AUV
-- [x] Range-Only localisation
+- [x] Range-Only measurements
 - [ ] AUV localisation using DVL
 
 ## List of program files:
@@ -69,4 +69,4 @@ File | Description
 desistek_dvl.py | Converts data from DVL and IMU into the position of the desistek.
 heron_controller.py | Control heron's thrusters.
 heron_thrustersManager.py | Get the thrusters values from heron_controller.py and send them to the ASV.
-lbl.py | Simulates the LBL range-only localisation between the two robots.
+lbl.py | Simulates the LBL range-only measurements between the two robots.
