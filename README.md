@@ -53,7 +53,7 @@ Add the following lines:
   namespace="${namespace}"
   parent_link="${namespace}/base_link"
   inertial_reference_frame="${inertial_reference_frame}">
-  <origin xyz="0 0 0" rpy="0 ${0.5*pi} 0"/>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
 </xacro:default_dvl_macro>
 ```
 ### Heron:
@@ -61,7 +61,7 @@ Add the following lines:
 ## Work done:
 - [x] Launch a UUV simulator world with an ASV and an AUV
 - [x] Range-Only measurements
-- [ ] AUV localisation using DVL
+- [ ] AUV localisation using DVL and IMU
 
 ## List of program files:
 File | Description
