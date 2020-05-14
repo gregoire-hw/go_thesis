@@ -61,7 +61,9 @@ Add the following lines:
 ## Work done:
 - [x] Launch a UUV simulator world with an ASV and an AUV
 - [x] Range-Only measurements
-- [ ] AUV localisation using DVL and IMU
+- [X] AUV localisation using DVL and IMU
+- [ ] ASV localisation using GPS
+- [ ] Localisation using EKF
 
 ## List of program files:
 File | Description
