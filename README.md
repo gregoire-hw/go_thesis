@@ -64,11 +64,15 @@ Add the following lines:
 - [X] AUV localisation using DVL and IMU
 - [ ] ASV localisation using GPS
 - [ ] Localisation using EKF
+- [ ] Localisation using Trilateration and NLS methods
 
 ## List of program files:
 File | Description
 -----|------------
 desistek_dvl.py | Converts data from DVL and IMU into the position of the desistek.
+ekf.py | Estimates the AUV position using EKF.
 heron_controller.py | Control heron's thrusters.
+heron_gps.py | Get the GPS localisation of the ASV.
 heron_thrustersManager.py | Get the thrusters values from heron_controller.py and send them to the ASV.
 lbl.py | Simulates the LBL range-only measurements between the two robots.
+trilateration.py | Estimates the AUV position using trilateration and NLS methods.
