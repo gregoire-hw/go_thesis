@@ -56,6 +56,28 @@ Add the following lines:
   <origin xyz="0 0 0" rpy="0 0 0"/>
 </xacro:default_dvl_macro>
 ```
+Set sensor noise:
+```
+$ roscd uuv_sensor_ros_plugins/urdf/
+$ sudo gedit dvl_snippets.xacro
+```
+Replace the following lines
+```xml
+<xacro:macro name="default_dvl_macro" params="namespace parent_link *origin inertial_reference_frame">
+  <xacro:dvl_plugin_macro
+    namespace="${namespace}"
+    suffix=""
+    parent_link="${parent_link}"
+    reference_frame="${inertial_reference_frame}"
+    update_rate="7"
+    topic="dvl"
+    noise_sigma="0.05"
+    noise_amplitude="1.0"
+    scale="1">
+    <xacro:insert_block name="origin" />
+  </xacro:dvl_plugin_macro>
+</xacro:macro>
+```
 ### Heron:
 
 ## Work done:
