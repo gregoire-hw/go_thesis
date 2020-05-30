@@ -84,8 +84,8 @@ Replace the following lines
 - [x] Launch a UUV simulator world with an ASV and an AUV
 - [x] Range-Only measurements
 - [X] AUV localisation using DVL and IMU
-- [ ] ASV localisation using GPS
-- [ ] Localisation using EKF
+- [X] ASV localisation using GPS
+- [X] Localisation using EKF
 - [ ] Localisation using Trilateration and NLS methods
 
 ## List of program files:
