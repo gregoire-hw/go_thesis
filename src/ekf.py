@@ -5,7 +5,6 @@ EKF Localisation for the AUV using dead reckoning + range-only localisation.
 
 Input:	/desistek_saga/dvl
 		/desistek_saga/imu
-		/pose_gt
 		/lbl_range	# 1Hz
 
 Output: /pose/ekf
@@ -28,6 +27,7 @@ class ekf:
 		self.dvl_y = 0
 		self.dvl_z = 0
 		self.theta = 0
+		self.depth = 0
 		# Pose estimation of the ASV from the GPS
 		self.asv_x = 0
 		self.asv_y = 0
@@ -41,19 +41,24 @@ class ekf:
 		# Matrices
 		self.corrected_state = np.array([[0.0],
 			[0.0],
-			[-5.0],
+			[-80.0],
 			[0.0]])
 		self.matrix_A = np.array([[1.0,0.0,0.0,0.0],
 			[0.0,1.0,0.0,0.0],
 			[0.0,0.0,1.0,0.0],
 			[0.0,0.0,0.0,1.0]])
-		self.matrix_R = np.array([[0.1,0.0,0.0,0.0],
-			[0.0,0.1,0.0,0.0],
-			[0.0,0.0,0.1,0.0],
-			[0.0,0.0,0.0,0.1]])
-		self.matrix_Q = np.array([[0.1,0.0,0.0],
-			[0.0,0.1,0.0],
-			[0.0,0.0,0.1]])
+
+		dvl_uncertainty = 0.05
+		self.matrix_R = np.array([[dvl_uncertainty,0.0,0.0,0.0],
+			[0.0,dvl_uncertainty,0.0,0.0],
+			[0.0,0.0,dvl_uncertainty,0.0],
+			[0.0,0.0,0.0,0.03]])
+
+		self.matrix_Q = np.array([[1,0.0,0.0],
+			[0.0,1,0.0],
+			[0.0,0.0,0.05]])
+
+
 		self.matrix_H = np.array([[1.0,0.0,0.0,0.0],
 			[0.0,1.0,0.0,0.0],
 			[0.0,0.0,1.0,0.0]])
@@ -75,9 +80,12 @@ class ekf:
 		# Topics
 		sub_dvl = rospy.Subscriber('/desistek_saga/dvl',DVL,self.dvl_sub)
 		sub_imu = rospy.Subscriber('/desistek_saga/imu', Imu, self.imu_sub)
-		sub_gps = rospy.Subscriber('/pose_gt',Odometry,self.gps_sub)
+		sub_depth = rospy.Subscriber('/desistek_saga/Depth',Odometry,self.depth_sub)
 		sub_ro = rospy.Subscriber('/lbl_range',RangeOnly,self.ro_sub)
 		self.pubPose = rospy.Publisher('/pose/ekf',Odometry,queue_size = 1)
+
+	def depth_sub(self,msg):
+		self.depth = msg.pose.pose.position.z
 
 	def dvl_sub(self,msg):
 		self.dvl_x = msg.velocity.x
@@ -99,18 +107,12 @@ class ekf:
 
 			self.filter()
 
-	def gps_sub(self,msg):
-		if self.counter >= self.gpsrate:
-			self.asv_x = msg.pose.pose.position.x
-			self.asv_y = msg.pose.pose.position.y
-			self.asv_z = msg.pose.pose.position.z
-			self.gpsReceived = True
-		self.counter += 1
-		if self.counter > 20:
-			self.counter = 0
-
 	def ro_sub(self,msg):
 		self.range = msg.range
+		self.asv_x = msg.x
+		self.asv_y = msg.y
+		self.asv_z = msg.z
+		self.gpsReceived = True
 
 	def filter(self):
 		time = rospy.get_time()
@@ -147,7 +149,33 @@ class ekf:
 			varphi = math.atan2(matrix_z[1]-self.corrected_state[1],matrix_z[0]-self.corrected_state[0])
 			phi = math.atan2(matrix_z[2]-self.corrected_state[2],math.sqrt(math.pow(matrix_z[0]-self.corrected_state[0],2)+math.pow(matrix_z[1]-self.corrected_state[1],2)))
 
+			############ Observation Covariance ############
+			dvl_uncertainty = 0.05*delta_time
+			self.matrix_R = np.array([[dvl_uncertainty,0.0,0.0,0.0],
+				[0.0,dvl_uncertainty,0.0,0.0],
+				[0.0,0.0,dvl_uncertainty,0.0],
+				[0.0,0.0,0.0,0.03]])
+			############ Measurement Covariance ############
+			# Eigen Values:
+			eVal1 = 1.
+			eVal2 = 0.001
+			# Compute Eigen Vectors
+			rot = np.array([[math.cos(varphi), -math.sin(varphi)],
+				[math.sin(varphi), math.cos(varphi)]])
 			
+			val1 = np.array([[eVal1],
+				[0]])
+			eVec1 = np.dot(rot,val1)
+			val2 = np.array([[0],
+				[eVal2]])
+			eVec2 = np.dot(rot,val2)
+			# Compute Covariance Matrix
+			cov = eVal1*np.dot(eVec1,eVec1.T)/(np.dot(eVec1.T,eVec1)) + eVal2*np.dot(eVec2,eVec2.T)/(np.dot(eVec2.T,eVec2))
+
+			self.matrix_Q = np.array([[cov[0][0],cov[0][1],0.],
+				[cov[1][0],cov[1][1], 0.],
+				[0.,0.,0.05]])
+
 			############ Prediction Step ############
 			predicted_state =  np.dot(self.matrix_A,self.corrected_state)+np.dot(matrix_B,matrix_u)
 			predicted_covariance = np.dot(matrix_G,np.dot(self.corrected_covariance,matrix_G.T)) + self.matrix_R
@@ -167,9 +195,8 @@ class ekf:
 			self.corrected_state = predicted_state + np.dot(matrix_K,innovation)
 			self.corrected_covariance = np.dot((self.matrix_I - np.dot(matrix_K,self.matrix_H)),predicted_covariance)
 
-
 		self.previous_time = time
-
+		
 		self.publish(self.corrected_state[0],self.corrected_state[1],self.corrected_state[2])
 
 	def publish(self,x,y,z):

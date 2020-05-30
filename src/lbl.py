@@ -12,6 +12,7 @@ Output: /lbl_range
 import rospy
 import sys
 import math
+import numpy as np
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Odometry
 from go_thesis.msg import RangeOnly
@@ -20,7 +21,7 @@ from go_thesis.msg import RangeOnly
 class LongBaseline:
 	def __init__(self):
 		self.rate = 20				# refreshing rate = 20Hz
-		self.transmissionPeriod = 1	# transmission rate = 2 s
+		self.transmissionPeriod = 0.5	# transmission period = 1 s
 		self.acousticSpeed = 1500	# speed of acoustic waves underwater: 1500 m/s
 
 		self.desistek_pose = [0,0,0]
@@ -55,12 +56,17 @@ class LongBaseline:
 
 		# If there is at least 1 beam sent: compute the range with the actual position of the AUV.
 		if len(self.queue) > 0:
-			dist = math.sqrt((self.queue[0][1][0] + self.desistek_pose[0])**2 + (self.queue[0][1][1] + self.desistek_pose[1])**2 + (self.queue[0][1][2] + self.desistek_pose[2])**2)
+			dist = math.sqrt((self.queue[0][1][0] - self.desistek_pose[0])**2 + (self.queue[0][1][1] - self.desistek_pose[1])**2 + (self.queue[0][1][2] - self.desistek_pose[2])**2)
 			self.beamDist += 1
 			if dist >= self.beamDist/self.rate*self.acousticSpeed:	# Takes in count the propagation speed of the acoustic waves
 				ro = RangeOnly()
 				ro.time = self.queue[0][0]
 				ro.range = dist
+				ro.x = np.random.normal(self.queue[0][1][0],1)
+				ro.y = np.random.normal(self.queue[0][1][1],1)
+				#ro.x = self.queue[0][1][0]
+				#ro.y = self.queue[0][1][1]
+				ro.z = self.queue[0][1][2]
 				del self.queue[0]
 				self.beamDist = 0
 				self.pubRange.publish(ro)
