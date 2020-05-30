@@ -36,7 +36,7 @@ class dvl:
 		# The STARTING parameter corresponds to the starting position of the AUV in the world.
 		self.STARTING_X = 0
 		self.STARTING_Y = 0
-		self.STARTING_Z = -5
+		self.STARTING_Z = -80
 		self.STARTING_radianX = 0
 		self.STARTING_radianY = 0
 		self.STARTING_radianZ = 0
@@ -59,9 +59,6 @@ class dvl:
 		self.imuX = 0
 		self.imuY = 0
 		self.imuZ = 0
-		self.angvelX = 0
-		self.angvelY = 0
-		self.angvelZ = 0
 		self.lastImuX = 0
 		self.lastImuY = 0
 		self.lastImuZ = 0
@@ -78,10 +75,9 @@ class dvl:
 		self.dvlseq = msg.header.seq
 		self.dvlsecs = msg.header.stamp.secs
 		self.dvlnsecs = msg.header.stamp.nsecs
-		self.dvlX = msg.velocity.z 		############ /!\ ###########
+		self.dvlX = msg.velocity.x
 		self.dvlY = msg.velocity.y
-		self.dvlZ = msg.velocity.x      ############ /!\ ###########
-
+		self.dvlZ = msg.velocity.z
 		self.dvlReceived = True
 
 	# Read the IMU topic
@@ -103,10 +99,6 @@ class dvl:
 			self.imuY = Y
 			self.imuZ = Z
 
-			self.angvelX = msg.angular_velocity.x
-			self.angvelY = msg.angular_velocity.y
-			self.angvelZ = msg.angular_velocity.z
-
 			# Now that the dvl and the imu have sent data, estimate the position
 			self.estimateTraj()
 
@@ -114,12 +106,15 @@ class dvl:
 	# Estimates the position of the robot
 	def estimateTraj(self):
 		dt = float(self.timeDVL - self.previous_time)
-		X = self.dvlX - self.OFFSET_X*(self.imuZ-self.lastImuZ)/dt
-		Y = self.dvlY - self.OFFSET_Y*(self.imuZ-self.lastImuZ)/dt
+		
+		X = self.dvlX - self.OFFSET_X*(self.imuZ-self.lastImuZ + self.imuY-self.lastImuY)/dt
+		Y = self.dvlY - self.OFFSET_Y*(self.imuZ-self.lastImuZ + self.imuX-self.lastImuX)/dt
+		Z = self.dvlZ - self.OFFSET_Z*(self.imuX-self.lastImuX + self.imuY-self.lastImuY)/dt
 
-		self.estimated_traj_x = self.estimated_traj_x + (X * dt * math.cos(self.imuZ) - Y * dt * math.sin(self.imuZ))
-		self.estimated_traj_y = self.estimated_traj_y + (X * dt * math.sin(self.imuZ) + Y * dt * math.cos(self.imuZ))
-		self.estimated_traj_z = self.estimated_traj_z - self.dvlZ * dt
+		self.estimated_traj_x += dt*(X*math.cos(self.imuZ) + Y*math.sin(self.imuZ))
+		self.estimated_traj_y -= dt*(-X*math.sin(self.imuZ) + Y*math.cos(self.imuZ))
+		self.estimated_traj_z += Z*dt
+		
 		self.previous_time = self.timeDVL
 		self.lastImuX = self.imuX + self.STARTING_radianX
 		self.lastImuY = self.imuY + self.STARTING_radianY
@@ -136,7 +131,6 @@ class dvl:
 		odm.header.stamp.nsecs = 1000000000*(rostime-int(rostime))
 
 		odm.header.frame_id = "world"
-		#odm.child_frame_id = "desistek_saga/base_link"
 
 		odm.pose.pose.position.x = self.estimated_traj_x
 		odm.pose.pose.position.y = self.estimated_traj_y

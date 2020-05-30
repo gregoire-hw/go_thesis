@@ -2,13 +2,13 @@
 
 <launch>
 	<!-- launch Gazebo world -->
-	<include file="$(find uuv_gazebo_worlds)/launch/ocean_waves.launch"/>
+	<include file="$(find go_thesis)/launch/ocean_waves.launch"/>
 
 	<!-- launch AUV model -->
 	<include file="$(find desistek_saga_description)/launch/upload_desistek_saga.launch">
 	    <arg name="x" value="0.0"/>
     	<arg name="y" value="0.0"/>
-    	<arg name="z" value="-5.0"/>
+    	<arg name="z" value="-80.0"/>
     	<arg name="yaw" value="0.0"/>
     </include>
 	
@@ -28,5 +28,14 @@
 	<node pkg="go_thesis" type="heron_controller.py" name="heron_control" output="screen"/>
 
 	<!-- Long Baseline -->
-	<!-- <node pkg="go_thesis" type="lbl.py" name="lbl_comm" output="screen"/> -->
+	<node pkg="go_thesis" type="lbl.py" name="lbl_comm" output="screen"/>
+
+	<!-- Start dvl for desistek -->
+	<node pkg="go_thesis" type="desistek_dvl.py" name="read_dvl" output="screen"/>
+
+	<!-- Start EKF -->
+	<node pkg="go_thesis" type="ekf.py" name="ekf_estimation" output="screen"/>
+
+	<!-- Start Depth Sensor -->
+	<node pkg="go_thesis" type="desistek_depth.py" name="depth_sensor" output="screen"/>
 </launch>
