@@ -87,6 +87,7 @@ Replace the following lines
 - [X] ASV localisation using GPS
 - [X] Localisation using EKF
 - [ ] Localisation using Trilateration and NLS methods
+- [ ] ASV motion service
 
 ## List of program files:
 File | Description
