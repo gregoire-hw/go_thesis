@@ -21,7 +21,11 @@ from go_thesis.msg import RangeOnly
 class LongBaseline:
 	def __init__(self):
 		self.rate = 20				# refreshing rate = 20Hz
+<<<<<<< HEAD
 		self.transmissionPeriod = 0.5	# transmission period = 0.5 s
+=======
+		self.transmissionPeriod = 0.5	# transmission period = 1 s
+>>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 		self.acousticSpeed = 1500	# speed of acoustic waves underwater: 1500 m/s
 
 		self.desistek_pose = [0,0,0]

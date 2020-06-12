@@ -38,3 +38,64 @@ $ git clone https://github.com/gregoire-hw/go_thesis.git
 $ cd ~/catkin_ws
 & catkin_make
 ```
+
+## Set the different sensors:
+### Desistek Saga:
+The DVL needs to be added to the desistek saga.
+```
+$ roscd desistek_saga_description/urdf/
+$ sudo gedit desistek_saga_sensors.xacro
+```
+Add the following lines:
+```xml
+<!-- DVL -->
+<xacro:default_dvl_macro
+  namespace="${namespace}"
+  parent_link="${namespace}/base_link"
+  inertial_reference_frame="${inertial_reference_frame}">
+  <origin xyz="0 0 0" rpy="0 0 0"/>
+</xacro:default_dvl_macro>
+```
+Set sensor noise:
+```
+$ roscd uuv_sensor_ros_plugins/urdf/
+$ sudo gedit dvl_snippets.xacro
+```
+Replace the following lines
+```xml
+<xacro:macro name="default_dvl_macro" params="namespace parent_link *origin inertial_reference_frame">
+  <xacro:dvl_plugin_macro
+    namespace="${namespace}"
+    suffix=""
+    parent_link="${parent_link}"
+    reference_frame="${inertial_reference_frame}"
+    update_rate="7"
+    topic="dvl"
+    noise_sigma="0.05"
+    noise_amplitude="1.0"
+    scale="1">
+    <xacro:insert_block name="origin" />
+  </xacro:dvl_plugin_macro>
+</xacro:macro>
+```
+### Heron:
+
+## Work done:
+- [x] Launch a UUV simulator world with an ASV and an AUV
+- [x] Range-Only measurements
+- [X] AUV localisation using DVL and IMU
+- [X] ASV localisation using GPS
+- [X] Localisation using EKF
+- [ ] Localisation using Trilateration and NLS methods
+- [ ] ASV motion service
+
+## List of program files:
+File | Description
+-----|------------
+desistek_dvl.py | Converts data from DVL and IMU into the position of the desistek.
+ekf.py | Estimates the AUV position using EKF.
+heron_controller.py | Control heron's thrusters.
+heron_gps.py | Get the GPS localisation of the ASV.
+heron_thrustersManager.py | Get the thrusters values from heron_controller.py and send them to the ASV.
+lbl.py | Simulates the LBL range-only measurements between the two robots.
+trilateration.py | Estimates the AUV position using trilateration and NLS methods.

@@ -5,11 +5,7 @@ EKF Localisation for the AUV using dead reckoning + range-only localisation.
 
 Input:	/desistek_saga/dvl
 		/desistek_saga/imu
-<<<<<<< HEAD
 		/lbl_range	# 2Hz
-=======
-		/lbl_range	# 1Hz
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 
 Output: /pose/ekf
 
@@ -21,10 +17,7 @@ import numpy as np
 import sys
 from nav_msgs.msg import Odometry
 from go_thesis.msg import RangeOnly
-<<<<<<< HEAD
 from go_thesis.msg import EkfMsg
-=======
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 from sensor_msgs.msg import Imu
 from uuv_sensor_ros_plugins_msgs.msg import DVL
 
@@ -66,10 +59,6 @@ class ekf:
 			[0.0,1,0.0],
 			[0.0,0.0,0.05]])
 
-<<<<<<< HEAD
-=======
-
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 		self.matrix_H = np.array([[1.0,0.0,0.0,0.0],
 			[0.0,1.0,0.0,0.0],
 			[0.0,0.0,1.0,0.0]])
@@ -81,10 +70,7 @@ class ekf:
 			[0.0,0.1,0.0,0.0],
 			[0.0,0.0,0.1,0.0],
 			[0.0,0.0,0.0,0.1]])
-<<<<<<< HEAD
 		self.innovation = np.array([[0.],[0.],[0.]])
-=======
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 		# Other needed variables
 		self.previous_time = 0
 		self.previous_theta = 0
@@ -97,12 +83,8 @@ class ekf:
 		sub_imu = rospy.Subscriber('/desistek_saga/imu', Imu, self.imu_sub)
 		sub_depth = rospy.Subscriber('/desistek_saga/Depth',Odometry,self.depth_sub)
 		sub_ro = rospy.Subscriber('/lbl_range',RangeOnly,self.ro_sub)
-<<<<<<< HEAD
-		self.pubPose = rospy.Publisher('/ekf/pose',Odometry,queue_size = 1)
-		self.pubEkf = rospy.Publisher('/ekf/info',EkfMsg,queue_size = 1)
-=======
-		self.pubPose = rospy.Publisher('/pose/ekf',Odometry,queue_size = 1)
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
+		self.pubPose = rospy.Publisher('/ekf/pose/filtered',Odometry,queue_size = 1)
+		self.pubEkf = rospy.Publisher('/ekf/info/filtered',EkfMsg,queue_size = 1)
 
 	def depth_sub(self,msg):
 		self.depth = msg.pose.pose.position.z
@@ -211,14 +193,15 @@ class ekf:
 				matrix_K = np.dot(np.dot(predicted_covariance,self.matrix_H.T),np.linalg.inv((np.dot(self.matrix_H,np.dot(predicted_covariance,self.matrix_H.T)))+self.matrix_Q))
 
 			############ Correction Step ############
-<<<<<<< HEAD
+			previous_dist_correct = math.sqrt(math.pow(self.corrected_state[0],2)+math.pow(self.corrected_state[1],2)+math.pow(self.corrected_state[2],2))
 			self.innovation = matrix_z - matrix_C_dot_matrix_x
 			self.corrected_state = predicted_state + np.dot(matrix_K,self.innovation)
-=======
-			innovation = matrix_z - matrix_C_dot_matrix_x
-			self.corrected_state = predicted_state + np.dot(matrix_K,innovation)
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 			self.corrected_covariance = np.dot((self.matrix_I - np.dot(matrix_K,self.matrix_H)),predicted_covariance)
+			dist_correct = math.sqrt(math.pow(self.corrected_state[0],2)+math.pow(self.corrected_state[1],2)+math.pow(self.corrected_state[2],2))
+
+			if abs(dist_correct - previous_dist_correct) > 0.02:
+				self.corrected_state = predicted_state
+				self.corrected_covariance = predicted_covariance
 
 		self.previous_time = time
 		
@@ -238,15 +221,12 @@ class ekf:
 
 		self.pubPose.publish(odm)
 
-<<<<<<< HEAD
 		ek = EkfMsg()
 		ek.covariance = [self.corrected_covariance[0][0],self.corrected_covariance[1][0],self.corrected_covariance[2][0],self.corrected_covariance[3][0],self.corrected_covariance[0][1],self.corrected_covariance[1][1],self.corrected_covariance[2][1],self.corrected_covariance[3][1],self.corrected_covariance[0][2],self.corrected_covariance[1][2],self.corrected_covariance[2][2],self.corrected_covariance[3][2],self.corrected_covariance[0][3],self.corrected_covariance[1][3],self.corrected_covariance[2][3],self.corrected_covariance[3][3]]
 		ek.innovation = [self.innovation[0][0],self.innovation[0][0],self.innovation[0][0]]
 		self.pubEkf.publish(ek)
 
 
-=======
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 	# Converts the quaternion to euler
 	def quaternion_to_euler(self,x,y,z,w):
 		t0 = +2.0 * (w * x + y * z)
@@ -266,7 +246,7 @@ class ekf:
 
 
 def main(args):
-	rospy.init_node('ekf_estimation', anonymous=True)
+	rospy.init_node('ekf_estimation_filtered', anonymous=True)
 	rospy.loginfo("Starting ekf.py")
 	estim = ekf()
 

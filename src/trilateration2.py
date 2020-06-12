@@ -26,11 +26,8 @@ class Trilateration:
 		self.start = False
 		self.timeDVL = rospy.get_time()
 		self.previous_time = self.timeDVL
-<<<<<<< HEAD
 		self.gps_rate = 3
 		self.gps_counter = 0
-=======
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 		# Velocity estimation of the AUV from the DVL and IMU
 		self.dvl_x = 0.
 		self.dvl_y = 0.
@@ -40,9 +37,8 @@ class Trilateration:
 		self.add_y = [0.,0.,0.,0.,0.]
 		self.add_z = [0.,0.,0.,0.,0.]
 		# pose estimation of the ASV from the GPS
-		self.asv_x = [0.,0.,0.,0.,0.]
-		self.asv_y = [0.,0.,0.,0.,0.]
-		self.asv_z = [0.,0.,0.,0.,0.]
+		p1 = np.array([[0.],[0.]])
+		self.p = [p1,p1,p1,p1,p1]
 		# Range between the 2 robots
 		self.range = [0.,0.,0.,0.,0.]
 		# Position obtained after NLS
@@ -54,36 +50,13 @@ class Trilateration:
 		self.previous_theta = 0
 		self.gpsReceived = False
 		self.dvlReceived = False
-<<<<<<< HEAD
-=======
-		self.gpsrate = 20
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 		self.counter = 0
 		self.beacon = 0
-		# Matrices
-		self.matrix_f = np.array([[0.],
-			[0.],
-			[0.],
-			[0.],
-			[0.]])
-		self.matrix_J = np.array([[0.,0.,0.],
-			[0.,0.,0.],
-			[0.,0.,0.],
-			[0.,0.,0.],
-			[0.,0.,0.]])
-<<<<<<< HEAD
-		self.matrix_R = np.array([[4.],
-			[4.],
-=======
-		self.matrix_R = np.array([[0.],
-			[2.],
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
-			[-80.]])
 		# Topics
 		sub_dvl = rospy.Subscriber('/desistek_saga/dvl',DVL,self.dvl_sub)
 		sub_imu = rospy.Subscriber('/desistek_saga/imu', Imu, self.imu_sub) 
 		sub_ro = rospy.Subscriber('/lbl_range',RangeOnly,self.ro_sub)
-		self.pubPose = rospy.Publisher('/pose/trilateration',Odometry,queue_size = 1)
+		self.pubPose = rospy.Publisher('/pose/trilateration_a',Odometry,queue_size = 1)
 
 	def trilateration(self):
 		self.add_x[self.beacon] = 0
@@ -98,31 +71,56 @@ class Trilateration:
 		self.nls()
 
 	def nls(self):
-		if self.start == True:
-			# Do the iteration 10 times
-<<<<<<< HEAD
-			#print self.asv_x
-			#print self.asv_y
-			#print self.asv_z
-			#print self.range
-			#print "---------"
-=======
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
-			for j in range(100):
-				for i in range(self.nbBeacons):
-					self.matrix_f[i][0] = math.sqrt(math.pow(self.matrix_R[0][0]-(self.asv_x[i]+self.add_x[i]),2)+math.pow(self.matrix_R[1][0]-(self.asv_y[i]+self.add_y[i]),2)+math.pow(self.matrix_R[2][0]-(self.asv_z[i]+self.add_z[i]),2))-self.range[i]
-					self.matrix_J[i][0] = (self.matrix_R[0][0]-self.asv_x[i])/(self.matrix_f[i][0]+self.range[i])
-					self.matrix_J[i][1] = (self.matrix_R[1][0]-self.asv_y[i])/(self.matrix_f[i][0]+self.range[i])
-					self.matrix_J[i][2] = (self.matrix_R[2][0]-self.asv_z[i])/(self.matrix_f[i][0]+self.range[i])
-				# Newton iteration:
-<<<<<<< HEAD
-=======
-				print self.matrix_J
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
-				self.matrix_R = self.matrix_R - np.dot(np.linalg.inv(np.dot(self.matrix_J.T,self.matrix_J)),np.dot(self.matrix_J.T,self.matrix_f))
-		self.publish()
+		I = np.array([[1,0],[0,1]])
+		# Calculates a, B, c
+		a = 0
+		B = 0
+		c = 0
+		for i in range(self.nbBeacons):
+			a += np.dot(self.p[i],np.dot(self.p[i].T,self.p[i])) - math.pow(self.range[i],2)
+			B += -2*np.dot(self.p[i],self.p[i].T) - np.dot(self.p[i].T,self.p[i])*I + math.pow(self.range[i],2)*I
+			c += self.p[i]
+		a = a/self.nbBeacons
+		B = B/self.nbBeacons
+		c = c/self.nbBeacons
 
-	def publish(self):
+		# Calculates f and f'
+		f = a + np.dot(B,c) + 2*np.dot(c,np.dot(c.T,c))
+		fp = f[0]
+
+		# Calculates H and H'
+		H = 0
+		for i in range(self.nbBeacons):
+			H += np.dot(self.p[i],self.p[i].T)
+		H = -2*H/self.nbBeacons + 2*np.dot(c,c.T)
+		Hp = np.array([H[0][0]-H[1][0], H[0][1]-H[1][1]])
+
+		# Calculates Q and U:
+		Q = 1
+		U = Hp
+
+		# Calculates qTq:
+		qTq = 0
+		for i in range(self.nbBeacons):
+			qTq = math.pow(self.range[i],2) - np.dot(self.p[i].T,self.p[i])
+		qTq = qTq/self.nbBeacons + np.dot(c.T,c)
+
+		#Calculates q1 and q2:
+		v = Q*fp
+		u1 = U[0]
+		u2 = U[1]
+		deltaq2 = math.pow(2*v*u2/math.pow(u1,2),2) - 4*(1+math.pow(u2/u1,2))*(math.pow(v/u1,2)-qTq)
+		print deltaq2
+		q2 = (-(2*v*u2/math.pow(u1,2)) - math.sqrt(abs(deltaq2)))/(2*(1+(math.pow(u2/u1,2))))
+		q1 = -v/u1 - u2/u1 * q2
+
+		x = q1 + c[0]
+		y = q2 + c[1]
+		z = 4
+
+		self.publish(x,y,z)
+
+	def publish(self,x,y,z):
 		odm = Odometry()
 		rostime = rospy.get_time()
 		odm.header.stamp.secs = int(rostime)
@@ -130,11 +128,21 @@ class Trilateration:
 
 		odm.header.frame_id = "world"
 
-		odm.pose.pose.position.x = self.matrix_R[0][0]
-		odm.pose.pose.position.y = self.matrix_R[1][0]
-		odm.pose.pose.position.z = self.matrix_R[2][0]
+		odm.pose.pose.position.x = x
+		odm.pose.pose.position.y = y
+		odm.pose.pose.position.z = z
 
 		self.pubPose.publish(odm)
+
+
+	def ro_sub(self,msg):
+		self.gps_counter += 1
+		if self.gps_counter >= self.gps_rate:
+			self.gps_counter = 0
+			self.range[self.beacon] = math.sqrt(math.pow(msg.range,2)-math.pow(5.14,2))
+			self.p[self.beacon] = np.array([[msg.x],[msg.y]])
+
+			self.trilateration()
 
 	# Computes the distance parcoured by the AUV thanks to the DVL. Save them for each beacons
 	def dvlMoves(self):
@@ -171,26 +179,6 @@ class Trilateration:
 
 			self.dvlMoves()
 
-	def ro_sub(self,msg):
-<<<<<<< HEAD
-		self.gps_counter += 1
-		if self.gps_counter >= self.gps_rate:
-			self.gps_counter = 0
-			self.range[self.beacon] = msg.range
-			self.asv_x[self.beacon] = msg.x
-			self.asv_y[self.beacon] = msg.y
-			self.asv_z[self.beacon] = msg.z
-
-			self.trilateration()
-=======
-		self.range[self.beacon] = msg.range
-		self.asv_x[self.beacon] = msg.x
-		self.asv_y[self.beacon] = msg.y
-		self.asv_z[self.beacon] = msg.z
-
-		self.trilateration()
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
-
 	# Converts the quaternion to euler
 	def quaternion_to_euler(self,x,y,z,w):
 		t0 = +2.0 * (w * x + y * z)
@@ -209,7 +197,7 @@ class Trilateration:
 		return X, Y, Z
 
 def main(args):
-	rospy.init_node('trilateration_estimation', anonymous=True)
+	rospy.init_node('trilateration_estimation2', anonymous=True)
 	rospy.loginfo("Starting trilateration.py")
 	estim = Trilateration()
 
