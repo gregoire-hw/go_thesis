@@ -6,6 +6,8 @@ The aim of this project is to model the integration of aiding signals from an US
 A second objective aims at developing behaviour rules for the vehicles that will allow them to work around an inspection target, taking into account their physical and navigational constraints while allowing the AUV to benefit from the external position information. The constraints to respect will be to keep the tether between the USV and the AUV manageable during the motions.
 The objectives of this project are to develop multiple strategies to evaluate in terms of robustness and stability of the vehicles’ motion under differing levels of GNSS and communications noise and different environmental conditions.
 
+More information about the project and a literature review can be found here: https://github.com/gregoire-hw/go_thesis/blob/master/Portfolio___Multi_domain_coordinated_motion_for_autonomous_surface_and_underwater_vehicles(1).pdf
+
 ## Related Packages
 Required: Ubuntu 16.04 with ROS Kinetic (http://wiki.ros.org/kinetic). Also, the following packages are required: 
 
@@ -92,10 +94,12 @@ Replace the following lines
 ## List of program files:
 File | Description
 -----|------------
+desistek_depth.py | Get depth ofthe AUV from its depth sensor.
 desistek_dvl.py | Converts data from DVL and IMU into the position of the desistek.
 ekf.py | Estimates the AUV position using EKF.
 heron_controller.py | Control heron's thrusters.
-heron_gps.py | Get the GPS localisation of the ASV.
+heron_gotogoal.py | Uses the heron_controller service to reach position goals.
 heron_thrustersManager.py | Get the thrusters values from heron_controller.py and send them to the ASV.
 lbl.py | Simulates the LBL range-only measurements between the two robots.
+save_data.py | Saves some data into csv files
 trilateration.py | Estimates the AUV position using trilateration and NLS methods.
