@@ -26,11 +26,8 @@ class Trilateration:
 		self.start = False
 		self.timeDVL = rospy.get_time()
 		self.previous_time = self.timeDVL
-<<<<<<< HEAD
 		self.gps_rate = 3
 		self.gps_counter = 0
-=======
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 		# Velocity estimation of the AUV from the DVL and IMU
 		self.dvl_x = 0.
 		self.dvl_y = 0.
@@ -54,10 +51,6 @@ class Trilateration:
 		self.previous_theta = 0
 		self.gpsReceived = False
 		self.dvlReceived = False
-<<<<<<< HEAD
-=======
-		self.gpsrate = 20
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 		self.counter = 0
 		self.beacon = 0
 		# Matrices
@@ -71,13 +64,8 @@ class Trilateration:
 			[0.,0.,0.],
 			[0.,0.,0.],
 			[0.,0.,0.]])
-<<<<<<< HEAD
 		self.matrix_R = np.array([[4.],
 			[4.],
-=======
-		self.matrix_R = np.array([[0.],
-			[2.],
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 			[-80.]])
 		# Topics
 		sub_dvl = rospy.Subscriber('/desistek_saga/dvl',DVL,self.dvl_sub)
@@ -100,14 +88,11 @@ class Trilateration:
 	def nls(self):
 		if self.start == True:
 			# Do the iteration 10 times
-<<<<<<< HEAD
 			#print self.asv_x
 			#print self.asv_y
 			#print self.asv_z
 			#print self.range
 			#print "---------"
-=======
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 			for j in range(100):
 				for i in range(self.nbBeacons):
 					self.matrix_f[i][0] = math.sqrt(math.pow(self.matrix_R[0][0]-(self.asv_x[i]+self.add_x[i]),2)+math.pow(self.matrix_R[1][0]-(self.asv_y[i]+self.add_y[i]),2)+math.pow(self.matrix_R[2][0]-(self.asv_z[i]+self.add_z[i]),2))-self.range[i]
@@ -115,10 +100,6 @@ class Trilateration:
 					self.matrix_J[i][1] = (self.matrix_R[1][0]-self.asv_y[i])/(self.matrix_f[i][0]+self.range[i])
 					self.matrix_J[i][2] = (self.matrix_R[2][0]-self.asv_z[i])/(self.matrix_f[i][0]+self.range[i])
 				# Newton iteration:
-<<<<<<< HEAD
-=======
-				print self.matrix_J
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 				self.matrix_R = self.matrix_R - np.dot(np.linalg.inv(np.dot(self.matrix_J.T,self.matrix_J)),np.dot(self.matrix_J.T,self.matrix_f))
 		self.publish()
 
@@ -172,7 +153,6 @@ class Trilateration:
 			self.dvlMoves()
 
 	def ro_sub(self,msg):
-<<<<<<< HEAD
 		self.gps_counter += 1
 		if self.gps_counter >= self.gps_rate:
 			self.gps_counter = 0
@@ -182,14 +162,6 @@ class Trilateration:
 			self.asv_z[self.beacon] = msg.z
 
 			self.trilateration()
-=======
-		self.range[self.beacon] = msg.range
-		self.asv_x[self.beacon] = msg.x
-		self.asv_y[self.beacon] = msg.y
-		self.asv_z[self.beacon] = msg.z
-
-		self.trilateration()
->>>>>>> b8e9d2ec2eef1b879dab684de500e73664dea49e
 
 	# Converts the quaternion to euler
 	def quaternion_to_euler(self,x,y,z,w):
