@@ -1,0 +1,4 @@
+int32 direction
+float32 radius
+---
+bool success

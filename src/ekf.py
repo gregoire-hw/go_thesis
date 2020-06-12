@@ -5,7 +5,7 @@ EKF Localisation for the AUV using dead reckoning + range-only localisation.
 
 Input:	/desistek_saga/dvl
 		/desistek_saga/imu
-		/lbl_range	# 1Hz
+		/lbl_range	# 2Hz
 
 Output: /pose/ekf
 
@@ -17,6 +17,7 @@ import numpy as np
 import sys
 from nav_msgs.msg import Odometry
 from go_thesis.msg import RangeOnly
+from go_thesis.msg import EkfMsg
 from sensor_msgs.msg import Imu
 from uuv_sensor_ros_plugins_msgs.msg import DVL
 
@@ -58,7 +59,6 @@ class ekf:
 			[0.0,1,0.0],
 			[0.0,0.0,0.05]])
 
-
 		self.matrix_H = np.array([[1.0,0.0,0.0,0.0],
 			[0.0,1.0,0.0,0.0],
 			[0.0,0.0,1.0,0.0]])
@@ -70,6 +70,7 @@ class ekf:
 			[0.0,0.1,0.0,0.0],
 			[0.0,0.0,0.1,0.0],
 			[0.0,0.0,0.0,0.1]])
+		self.innovation = np.array([[0.],[0.],[0.]])
 		# Other needed variables
 		self.previous_time = 0
 		self.previous_theta = 0
@@ -82,7 +83,8 @@ class ekf:
 		sub_imu = rospy.Subscriber('/desistek_saga/imu', Imu, self.imu_sub)
 		sub_depth = rospy.Subscriber('/desistek_saga/Depth',Odometry,self.depth_sub)
 		sub_ro = rospy.Subscriber('/lbl_range',RangeOnly,self.ro_sub)
-		self.pubPose = rospy.Publisher('/pose/ekf',Odometry,queue_size = 1)
+		self.pubPose = rospy.Publisher('/ekf/pose',Odometry,queue_size = 1)
+		self.pubEkf = rospy.Publisher('/ekf/info',EkfMsg,queue_size = 1)
 
 	def depth_sub(self,msg):
 		self.depth = msg.pose.pose.position.z
@@ -191,8 +193,8 @@ class ekf:
 				matrix_K = np.dot(np.dot(predicted_covariance,self.matrix_H.T),np.linalg.inv((np.dot(self.matrix_H,np.dot(predicted_covariance,self.matrix_H.T)))+self.matrix_Q))
 
 			############ Correction Step ############
-			innovation = matrix_z - matrix_C_dot_matrix_x
-			self.corrected_state = predicted_state + np.dot(matrix_K,innovation)
+			self.innovation = matrix_z - matrix_C_dot_matrix_x
+			self.corrected_state = predicted_state + np.dot(matrix_K,self.innovation)
 			self.corrected_covariance = np.dot((self.matrix_I - np.dot(matrix_K,self.matrix_H)),predicted_covariance)
 
 		self.previous_time = time
@@ -212,6 +214,12 @@ class ekf:
 		odm.pose.pose.position.z = z
 
 		self.pubPose.publish(odm)
+
+		ek = EkfMsg()
+		ek.covariance = [self.corrected_covariance[0][0],self.corrected_covariance[1][0],self.corrected_covariance[2][0],self.corrected_covariance[3][0],self.corrected_covariance[0][1],self.corrected_covariance[1][1],self.corrected_covariance[2][1],self.corrected_covariance[3][1],self.corrected_covariance[0][2],self.corrected_covariance[1][2],self.corrected_covariance[2][2],self.corrected_covariance[3][2],self.corrected_covariance[0][3],self.corrected_covariance[1][3],self.corrected_covariance[2][3],self.corrected_covariance[3][3]]
+		ek.innovation = [self.innovation[0][0],self.innovation[0][0],self.innovation[0][0]]
+		self.pubEkf.publish(ek)
+
 
 	# Converts the quaternion to euler
 	def quaternion_to_euler(self,x,y,z,w):

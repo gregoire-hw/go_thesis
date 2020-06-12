@@ -6,9 +6,9 @@
 
 	<!-- launch AUV model -->
 	<include file="$(find desistek_saga_description)/launch/upload_desistek_saga.launch">
-	    <arg name="x" value="0.0"/>
-    	<arg name="y" value="0.0"/>
-    	<arg name="z" value="-80.0"/>
+	    <arg name="x" value="4.0"/>
+    	<arg name="y" value="4.0"/>
+    	<arg name="z" value="-5.0"/>
     	<arg name="yaw" value="0.0"/>
     </include>
 	
@@ -33,12 +33,9 @@
 	<!-- Start dvl for desistek -->
 	<node pkg="go_thesis" type="desistek_dvl.py" name="read_dvl" output="screen"/>
 
-	<!-- Start EKF -->
-	<node pkg="go_thesis" type="ekf.py" name="ekf_estimation" output="screen"/>
-
-	<node pkg="go_thesis" type="ekf_filtered.py" name="ekf_estimation_filtered" output="screen"/>
+	<!-- Start Trilateration -->
+	<node pkg="go_thesis" type="trilateration.py" name="trilateration_estimation" output="screen"/>
 
 	<!-- Start Depth Sensor -->
 	<node pkg="go_thesis" type="desistek_depth.py" name="depth_sensor" output="screen"/>
-
 </launch>
