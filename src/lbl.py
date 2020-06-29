@@ -13,6 +13,7 @@ import rospy
 import sys
 import math
 import numpy as np
+import random as rd
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Odometry
 from go_thesis.msg import RangeOnly
@@ -57,6 +58,8 @@ class LongBaseline:
 		# If there is at least 1 beam sent: compute the range with the actual position of the AUV.
 		if len(self.queue) > 0:
 			dist = math.sqrt((self.queue[0][1][0] - self.desistek_pose[0])**2 + (self.queue[0][1][1] - self.desistek_pose[1])**2 + (self.queue[0][1][2] - self.desistek_pose[2])**2)
+			if rd.randint(1,20) == 10:
+				dist += dist*0.1
 			self.beamDist += 1
 			if dist >= self.beamDist/self.rate*self.acousticSpeed:	# Takes in count the propagation speed of the acoustic waves
 				ro = RangeOnly()
