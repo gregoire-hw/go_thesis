@@ -88,7 +88,7 @@ Replace the following lines
 - [X] AUV localisation using DVL and IMU
 - [X] ASV localisation using GPS
 - [X] Localisation using EKF
-- [ ] Localisation using Trilateration and NLS methods
+- [X] Localisation using Particle Filter
 - [ ] ASV motion service
 
 ## List of program files:
@@ -101,5 +101,6 @@ heron_controller.py | Control heron's thrusters.
 heron_gotogoal.py | Uses the heron_controller service to reach position goals.
 heron_thrustersManager.py | Get the thrusters values from heron_controller.py and send them to the ASV.
 lbl.py | Simulates the LBL range-only measurements between the two robots.
+particle_filter.py | Estimates the AUV position using Particle Filter
 save_data.py | Saves some data into csv files
 trilateration.py | Estimates the AUV position using trilateration and NLS methods.
